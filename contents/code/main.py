@@ -13,6 +13,13 @@ char_set = string.ascii_letters + string.digits
 def randomString(j = 1):
 	return ''.join(random.sample(char_set, j))
 
+def pid_exists(pid, sig):
+	try:
+		os.kill(pid, sig)
+		return True
+	except OSError, err:
+		return False
+
 class plasmaGreatAdvice(plasmascript.Applet):
 	def __init__(self, parent = None):
 		plasmascript.Applet.__init__(self, parent)
@@ -52,14 +59,14 @@ class plasmaGreatAdvice(plasmascript.Applet):
 			Data.append(os.getcwd() + '/plasmaGreatAdvice/contents/code/getText.sh')
 		Data.append(fileName)
 		getAdsviceThread = QProcess()
-		start = getAdsviceThread.startDetached('/bin/sh', Data)
-		return fileName, start
+		start, pid = getAdsviceThread.startDetached('/bin/sh', Data, os.getcwd())
+		return fileName, start, pid
 
 	def showAdvice(self):
 		if 'Control' in dir(self) : self.Control.close()
-		fileName, start = self.getNewText()
+		fileName, start, pid = self.getNewText()
 		if start :
-			time.sleep(3)
+			while pid_exists(pid, 0): time.sleep(0.1)
 			if os.path.exists("/dev/shm/" + fileName) :
 				with open("/dev/shm/" + fileName, 'rb') as f :
 					data = f.read()
