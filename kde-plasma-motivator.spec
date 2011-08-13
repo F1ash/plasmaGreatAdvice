@@ -31,26 +31,23 @@ kde-plasma-motivator
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/%{_datadir}/%{name}
-mkdir -p $RPM_BUILD_ROOT/%{_datadir}/applications
-install -D -m 755 -p %{name} $RPM_BUILD_ROOT/%{_bindir}/%{name}
-#cp -r contents/code $RPM_BUILD_ROOT/%{_datadir}/%{name}/
-#cp -r contents/icons $RPM_BUILD_ROOT/%{_datadir}/%{name}/
-cp -r * $RPM_BUILD_ROOT/%{_datadir}/%{name}/
+mkdir -p $RPM_BUILD_ROOT/%{_kde4_appsdir}/plasma/plasmoids/%{name}
+cp -r * $RPM_BUILD_ROOT/%{_kde4_appsdir}/plasma/plasmoids/%{name}/
+mkdir -p $RPM_BUILD_ROOT/%{_datadir}/kde4/services
+cp -r metadata.desktop $RPM_BUILD_ROOT/%{_datadir}/kde4/services/%{name}.desktop
 
 
 %files
 %defattr(-,root,root)
-%{_datadir}/%{name}/contents/icons/*
-%{_datadir}/%{name}/contents/code/*
-%{_datadir}/%{name}/*
-%dir %{_datadir}/%{name}
+%{_datadir}/kde4/services/%{name}.desktop
+%{_kde4_appsdir}/plasma/plasmoids/%{name}/*
+%dir %{_kde4_appsdir}/plasma/plasmoids/%{name}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
-* Sub Aug 13 2011 Fl@sh <no@mail.me>	-	1.0
+* Sat Aug 13 2011 Fl@sh <no@mail.me>	-	1.0
 -- Build began ;)
 

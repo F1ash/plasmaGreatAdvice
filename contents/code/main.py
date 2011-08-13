@@ -26,6 +26,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 
 		self.kdehome = unicode(KGlobal.dirs().localkdedir()) + \
 						'share/apps/plasma/plasmoids/plasmaGreatAdvice/contents/'
+		# '/usr/share/kde4/apps/plasma/plasmoids/plasmaMailChecker/contents/code/'
 		self.Settings = QSettings('plasmaGreatAdvice', 'plasmaGreatAdvice')
 		self.timeout = self.Settings.value('TimeOut', QVariant(10)).toInt()[0]
 		self.autoclose = self.Settings.value('AutoClose', QVariant(3)).toInt()[0]
