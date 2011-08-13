@@ -21,6 +21,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 						'share/apps/plasma/plasmoids/plasmaGreatAdvice/contents/'
 		self.Settings = QSettings('plasmaGreatAdvice', 'plasmaGreatAdvice')
 		self.timeout = self.Settings.value('TimeOut', QVariant(10)).toInt()[0]
+		self.autoclose = self.Settings.value('AutoClose', QVariant(3)).toInt()[0]
 
 		self.adviceIcon = Plasma.IconWidget()
 		if os.path.exists(self.kdehome + 'icons/advice.png') :
@@ -59,14 +60,15 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		fileName, start = self.getNewText()
 		if start :
 			time.sleep(3)
-			try :
+			if os.path.exists("/dev/shm/" + fileName) :
 				with open("/dev/shm/" + fileName, 'rb') as f :
 					data = f.read()
-			except :
+			else :
 				data = 'error'
-			self.Control = ControlWidget(QString().fromUtf8(data), self)
+			print data
+			self.Control = ControlWidget(QString().fromUtf8(data), self.autoclose, self)
 			self.Control.show()
-			os.remove("/dev/shm/" + fileName)
+			if os.path.exists("/dev/shm/" + fileName) : os.remove("/dev/shm/" + fileName)
 
 	def show_n_hide(self):
 		if 'Control' not in dir(self): return None
@@ -95,6 +97,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		self.Timer.stop()
 		self.appletSettings.refreshSettings(self)
 		self.timeout = self.Settings.value('TimeOut', QVariant(10)).toInt()[0]
+		self.autoclose = self.Settings.value('AutoClose', QVariant(3)).toInt()[0]
 		self.Timer.start(self.timeout * 1000)
 		self.dialog.done(0)
 
@@ -106,7 +109,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		if 'Control' in dir(self) : self.Control.close()
 
 class ControlWidget(Plasma.Dialog):
-	def __init__(self, data, obj, parent = None):
+	def __init__(self, data, autoClose, obj, parent = None):
 		Plasma.Dialog.__init__(self, parent)
 		
 		self.layout = QGridLayout()
@@ -116,6 +119,14 @@ class ControlWidget(Plasma.Dialog):
 
 		self.setLayout(self.layout)
 
+		self.timer = QTimer()
+		self.timer.setSingleShot(True)
+		self.timer.timeout.connect(self.hide)
+		self.timer.start(autoClose * 1000)
+
+	def autoClose(self):
+		self.hide()
+
 class AppletSettings(QWidget):
 	def __init__(self, obj = None, parent= None):
 		QWidget.__init__(self, parent)
@@ -124,19 +135,27 @@ class AppletSettings(QWidget):
 		self.Settings = obj.Settings
 
 		timeOut = self.Settings.value('TimeOut', 10).toInt()[0]
+		autoClose = self.Settings.value('AutoClose', 3).toInt()[0]
 
 		self.layout = QGridLayout()
 
 		self.timeOutLabel = QLabel("Timeout checking (sec.):")
-		self.layout.addWidget(self.timeOutLabel,0,0)
+		self.layout.addWidget(self.timeOutLabel, 0, 0)
 		self.timeOutBox = KIntSpinBox(10, 7200, 1, timeOut, self)
 		self.timeOutBox.setMaximumWidth(75)
 		self.layout.addWidget(self.timeOutBox, 0, 5)
+
+		self.autoCloseLabel = QLabel("Advice auto close (sec.):")
+		self.layout.addWidget(self.autoCloseLabel, 1, 0)
+		self.autoCloseBox = KIntSpinBox(1, 7200, 1, autoClose, self)
+		self.autoCloseBox.setMaximumWidth(75)
+		self.layout.addWidget(self.autoCloseBox, 1, 5)
 
 		self.setLayout(self.layout)
 
 	def refreshSettings(self, parent = None):
 		self.Settings.setValue('TimeOut', str(self.timeOutBox.value()))
+		self.Settings.setValue('AutoClose', str(self.autoCloseBox.value()))
 		self.Settings.sync()
 
 	def eventClose(self, event):
