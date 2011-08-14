@@ -24,10 +24,8 @@ class plasmaGreatAdvice(plasmascript.Applet):
 	def __init__(self, parent = None):
 		plasmascript.Applet.__init__(self, parent)
 
-		self.kdehome = unicode(KGlobal.dirs().localkdedir()) + \
-						'share/apps/plasma/plasmoids/plasmaGreatAdvice/contents/'
-		# '/usr/share/kde4/apps/plasma/plasmoids/plasmaMailChecker/contents/code/'
-		self.Settings = QSettings('plasmaGreatAdvice', 'plasmaGreatAdvice')
+		self.kdehome = '/usr/share/kde4/apps/plasma/plasmoids/kde-plasma-motivator/contents/'
+		self.Settings = QSettings('kde-plasma-motivator', 'kde-plasma-motivator')
 		self.timeout = self.Settings.value('TimeOut', QVariant(10)).toInt()[0]
 		self.autoclose = self.Settings.value('AutoClose', QVariant(3)).toInt()[0]
 
@@ -35,7 +33,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		if os.path.exists(self.kdehome + 'icons/advice.png') :
 			self.adviceIcon.setIcon(self.kdehome + 'icons/advice.png')
 		else :
-			self.adviceIcon.setIcon(os.getcwd() + '/plasmaGreatAdvice/contents/icons/advice.png')
+			self.adviceIcon.setIcon(os.getcwd() + '/kde-plasma-motivator/contents/icons/advice.png')
 		self.adviceIcon.clicked.connect(self.show_n_hide)
 
 	def init(self):
@@ -57,7 +55,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		if os.path.exists(self.kdehome + 'code/getText.sh') :
 			Data.append(self.kdehome + 'code/getText.sh')
 		else :
-			Data.append(os.getcwd() + '/plasmaGreatAdvice/contents/code/getText.sh')
+			Data.append(os.getcwd() + '/kde-plasma-motivator/contents/code/getText.sh')
 		Data.append(fileName)
 		getAdsviceThread = QProcess()
 		start, pid = getAdsviceThread.startDetached('/bin/sh', Data, os.getcwd())
