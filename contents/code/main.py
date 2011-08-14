@@ -86,8 +86,11 @@ class plasmaGreatAdvice(plasmascript.Applet):
 			print data
 			text = QString().fromUtf8(data)
 			if self.popup == 1 :
+				self.adviceIcon.setIcon(self.kdehome + 'icons/advice.png')
 				self.Control = ControlWidget(text, self.autoclose, self, self.popupColor)
 				self.Control.show()
+			else :
+				self.adviceIcon.setIcon('')
 			if self.iconText == 1 :
 				self.adviceIcon.setText(text)
 			else:
