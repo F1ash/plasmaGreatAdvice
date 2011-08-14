@@ -1,5 +1,5 @@
 Name: kde-plasma-motivator
-Version: 1.0
+Version: 1.2
 Release: %(date +%Y%m%d_%H%M)%{?dist}
 Summary: Funny plasmoid for joke or motivation to work activities and keeping a good mood. 21 + .
 Summary(ru): Плазмоид-шутка для мотивации трудовой деятельности и просто хорошего настроения.

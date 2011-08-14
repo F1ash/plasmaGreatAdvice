@@ -26,8 +26,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 
 		self.kdehome = '/usr/share/kde4/apps/plasma/plasmoids/kde-plasma-motivator/contents/'
 		self.Settings = QSettings('kde-plasma-motivator', 'kde-plasma-motivator')
-		self.timeout = self.Settings.value('TimeOut', QVariant(10)).toInt()[0]
-		self.autoclose = self.Settings.value('AutoClose', QVariant(3)).toInt()[0]
+		self.initVar()
 
 		self.adviceIcon = Plasma.IconWidget()
 		if os.path.exists(self.kdehome + 'icons/advice.png') :
@@ -36,13 +35,26 @@ class plasmaGreatAdvice(plasmascript.Applet):
 			self.adviceIcon.setIcon(os.getcwd() + '/kde-plasma-motivator/contents/icons/advice.png')
 		self.adviceIcon.clicked.connect(self.show_n_hide)
 
+	def initVar(self):
+		self.timeout = self.Settings.value('TimeOut', QVariant(10)).toInt()[0]
+		self.autoclose = self.Settings.value('AutoClose', QVariant(3)).toInt()[0]
+		self.popup = self.Settings.value('PopUp', 0).toInt()[0]
+		self.iconText = self.Settings.value('IconText', 0).toInt()[0]
+		self.popupColor = self.Settings.value('PopUpColor', 'red').toString()
+		self.iconTextColor = self.Settings.value('IconTextColor', 'blue').toString()
+
 	def init(self):
 		self.layout = QGraphicsLinearLayout(self.applet)
 		self.layout.setSpacing(0)
 		self.layout.addItem(self.adviceIcon)
+		self.layout.setAlignment(self.adviceIcon, Qt.AlignRight)
 
 		self.setLayout(self.layout)
-
+		if self.applet.formFactor() == Plasma.Horizontal :
+			self.adviceIcon.setOrientation(Qt.Horizontal)
+		else :
+			self.adviceIcon.setOrientation(Qt.Vertical)
+		self.adviceIcon.setTextBackgroundColor(QColor(self.iconTextColor))
 		self.setHasConfigurationInterface(True)
 
 		self.Timer = QTimer()
@@ -72,8 +84,14 @@ class plasmaGreatAdvice(plasmascript.Applet):
 			else :
 				data = 'error'
 			print data
-			self.Control = ControlWidget(QString().fromUtf8(data), self.autoclose, self)
-			self.Control.show()
+			text = QString().fromUtf8(data)
+			if self.popup == 1 :
+				self.Control = ControlWidget(text, self.autoclose, self, self.popupColor)
+				self.Control.show()
+			if self.iconText == 1 :
+				self.adviceIcon.setText(text)
+			else:
+				self.adviceIcon.setText('')
 			if os.path.exists("/dev/shm/" + fileName) : os.remove("/dev/shm/" + fileName)
 
 	def show_n_hide(self):
@@ -81,7 +99,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		if self.Control.isVisible() :
 			self.Control.hide()
 		else:
-			#self.Control.move(self.popupPosition(self.Control.size()))
+			self.Control.move(self.popupPosition(self.Control.size()))
 			self.Control.show()
 
 	def createConfigurationInterface(self, parent):
@@ -102,8 +120,8 @@ class plasmaGreatAdvice(plasmascript.Applet):
 	def configAccepted(self):
 		self.Timer.stop()
 		self.appletSettings.refreshSettings(self)
-		self.timeout = self.Settings.value('TimeOut', QVariant(10)).toInt()[0]
-		self.autoclose = self.Settings.value('AutoClose', QVariant(3)).toInt()[0]
+		self.initVar()
+		self.adviceIcon.setTextBackgroundColor(QColor(self.iconTextColor))
 		self.Timer.start(self.timeout * 1000)
 		self.dialog.done(0)
 
@@ -115,12 +133,12 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		if 'Control' in dir(self) : self.Control.close()
 
 class ControlWidget(Plasma.Dialog):
-	def __init__(self, data, autoClose, obj, parent = None):
+	def __init__(self, data, autoClose, obj, color, parent = None):
 		Plasma.Dialog.__init__(self, parent)
 		
 		self.layout = QGridLayout()
 
-		self.advice = QLabel('<font color=red size=7><b>' + data + '</b></font>')
+		self.advice = QLabel('<font color=' + color + ' size=7><b>' + data + '</b></font>')
 		self.layout.addWidget(self.advice, 0, 0)
 
 		self.setLayout(self.layout)
@@ -130,18 +148,20 @@ class ControlWidget(Plasma.Dialog):
 		self.timer.timeout.connect(self.hide)
 		self.timer.start(autoClose * 1000)
 
-	def autoClose(self):
-		self.hide()
-
 class AppletSettings(QWidget):
 	def __init__(self, obj = None, parent= None):
 		QWidget.__init__(self, parent)
 
 		self.prnt = parent
 		self.Settings = obj.Settings
+		colorNames = QColor().colorNames()
 
 		timeOut = self.Settings.value('TimeOut', 10).toInt()[0]
 		autoClose = self.Settings.value('AutoClose', 3).toInt()[0]
+		popup = self.Settings.value('PopUp', 0).toInt()[0]
+		iconText = self.Settings.value('IconText', 0).toInt()[0]
+		popupColor = self.Settings.value('PopUpColor', 'red').toString()
+		iconTextColor = self.Settings.value('IconTextColor', 'blue').toString()
 
 		self.layout = QGridLayout()
 
@@ -157,11 +177,51 @@ class AppletSettings(QWidget):
 		self.autoCloseBox.setMaximumWidth(75)
 		self.layout.addWidget(self.autoCloseBox, 1, 5)
 
+		self.popupLabel = QLabel("Show pop-up advice:")
+		self.layout.addWidget(self.popupLabel, 2, 0)
+		self.popupBox = QCheckBox()
+		if popup == 0 :
+			self.popupBox.setCheckState(Qt.Unchecked)
+		else :
+			self.popupBox.setCheckState(Qt.Checked)
+		self.popupBox.setMaximumWidth(75)
+		self.layout.addWidget(self.popupBox, 2, 5)
+
+		self.popupColorLabel = QLabel("Pop-up color:")
+		self.layout.addWidget(self.popupColorLabel, 3, 0)
+		self.popupColorBox = QComboBox()
+		self.popupColorBox.setMaximumWidth(150)
+		self.popupColorBox.addItems(colorNames)
+		self.popupColorBox.setCurrentIndex(self.popupColorBox.findText(popupColor))
+		self.layout.addWidget(self.popupColorBox, 3, 5)
+
+		self.iconTextLabel = QLabel("Show advice in Icon:")
+		self.layout.addWidget(self.iconTextLabel, 4, 0)
+		self.iconTextBox = QCheckBox()
+		if iconText == 0 :
+			self.iconTextBox.setCheckState(Qt.Unchecked)
+		else :
+			self.iconTextBox.setCheckState(Qt.Checked)
+		self.iconTextBox.setMaximumWidth(75)
+		self.layout.addWidget(self.iconTextBox, 4, 5)
+
+		self.iconTextColorLabel = QLabel("IconText color:")
+		self.layout.addWidget(self.iconTextColorLabel, 5, 0)
+		self.iconTextColorBox = QComboBox()
+		self.iconTextColorBox.setMaximumWidth(150)
+		self.iconTextColorBox.addItems(colorNames)
+		self.iconTextColorBox.setCurrentIndex(self.iconTextColorBox.findText(iconTextColor))
+		self.layout.addWidget(self.iconTextColorBox, 5, 5)
+
 		self.setLayout(self.layout)
 
 	def refreshSettings(self, parent = None):
 		self.Settings.setValue('TimeOut', str(self.timeOutBox.value()))
 		self.Settings.setValue('AutoClose', str(self.autoCloseBox.value()))
+		self.Settings.setValue('PopUp', self.popupBox.checkState()/2)
+		self.Settings.setValue('IconText', self.iconTextBox.checkState()/2)
+		self.Settings.setValue('PopUpColor', self.popupColorBox.currentText())
+		self.Settings.setValue('IconTextColor', self.iconTextColorBox.currentText())
 		self.Settings.sync()
 
 	def eventClose(self, event):
