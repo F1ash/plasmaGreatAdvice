@@ -44,8 +44,8 @@ class plasmaGreatAdvice(plasmascript.Applet):
 	def initLayout(self):
 		if 'layout' in dir(self) :
 			for i in xrange(self.layout.count()) :
-				item = self.layout.itemAt(i)
-				self.layout.removeAt(i)
+				item = self.layout.itemAt(0)
+				self.layout.removeAt(0)
 				item = None
 		self.adviceIcon = Plasma.IconWidget()
 		self.adviceIcon.setIcon(self.iconPath)
