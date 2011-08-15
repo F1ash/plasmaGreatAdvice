@@ -74,6 +74,13 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		self.initLayout()
 		self.setHasConfigurationInterface(True)
 
+		Plasma.ToolTipManager.self().setContent( \
+				self.applet, \
+				Plasma.ToolTipContent( \
+								'Great Advice\nMotivator', \
+								QString(''), \
+								QIcon(self.iconPath) ) )
+
 		self.Timer = QTimer()
 		self.Timer.timeout.connect(self.showAdvice)
 		self.Timer.start(self.timeout * 1000)
