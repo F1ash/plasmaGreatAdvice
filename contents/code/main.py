@@ -43,13 +43,14 @@ class plasmaGreatAdvice(plasmascript.Applet):
 
 	def initLayout(self):
 		if 'layout' in dir(self) :
-			for i in xrange(self.layout.count()) :
-				item = self.layout.itemAt(0)
-				self.layout.removeAt(0)
+			count = self.layout.count()
+			for i in xrange(count) :
+				item = self.layout.itemAt(count -1 - i)
+				self.layout.removeAt(count -1 - i)
 				item = None
 		self.adviceIcon = Plasma.IconWidget()
 		self.adviceIcon.setIcon(self.iconPath)
-		self.adviceIcon.clicked.connect(self.show_n_hide)
+		if bool(self.popup) : self.adviceIcon.clicked.connect(self.show_n_hide)
 		if self.applet.formFactor() == Plasma.Horizontal :
 			self.adviceIcon.setOrientation(Qt.Horizontal)
 			self.layout.setOrientation(Qt.Horizontal)
