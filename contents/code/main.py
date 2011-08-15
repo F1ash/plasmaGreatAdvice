@@ -98,7 +98,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		start, pid = getAdsviceThread.startDetached('/bin/sh', Data, os.getcwd())
 		return fileName, start, pid
 
-	def showAdvice(self):
+	def preparedData(self):
 		if 'Control' in dir(self) : self.Control.close()
 		fileName, start, pid = self.getNewText()
 		if start :
@@ -106,30 +106,37 @@ class plasmaGreatAdvice(plasmascript.Applet):
 			if os.path.exists("/dev/shm/" + fileName) :
 				with open("/dev/shm/" + fileName, 'rb') as f :
 					data = f.read()
+				os.remove("/dev/shm/" + fileName)
+				if data == '' : data = 'Проверь коннект, ёпта! (Авт.)'
 			else :
-				data = 'error'
-			#print data
-			text = QString().fromUtf8(data)
-			if bool(self.popup) :
-				self.adviceIcon.setIcon(self.iconPath)
-				self.Control = ControlWidget(text, self.autoclose, self, self.popupColor)
-				self.Control.show()
-			else :
-				self.adviceIcon.setIcon('')
-			if self.applet.formFactor() == Plasma.Horizontal :
-				if bool(self.iconText) :
-					self.adviceIcon.setText(text)
-				else:
-					self.adviceIcon.setText('')
-			else :
-				if bool(self.iconText) :
-					text__ = str(data).replace(',', ', ')
-					text_ = text__.replace('  ', ' ')
-					text = QString().fromUtf8(text_.replace(' ', '\n'))
-					self.adviceLabel.setText(text)
-				else:
-					pass
-			if os.path.exists("/dev/shm/" + fileName) : os.remove("/dev/shm/" + fileName)
+				data = 'WARNING: Getting Advice Error'
+		else :
+			data = 'WARNING: Bad command for getting Advice'
+		return data
+
+	def showAdvice(self):
+		data = self.preparedData()
+		#print data
+		text = QString().fromUtf8(data)
+		if bool(self.popup) :
+			self.adviceIcon.setIcon(self.iconPath)
+			self.Control = ControlWidget(text, self.autoclose, self, self.popupColor)
+			self.Control.show()
+		else :
+			self.adviceIcon.setIcon('')
+		if self.applet.formFactor() == Plasma.Horizontal :
+			if bool(self.iconText) :
+				self.adviceIcon.setText(text)
+			else:
+				self.adviceIcon.setText('')
+		else :
+			if bool(self.iconText) :
+				text__ = str(data).replace(',', ', ')
+				text_ = text__.replace('  ', ' ')
+				text = QString().fromUtf8(text_.replace(' ', '\n'))
+				self.adviceLabel.setText(text)
+			else:
+				pass
 
 	def show_n_hide(self):
 		if 'Control' not in dir(self): return None
