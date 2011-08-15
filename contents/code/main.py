@@ -53,7 +53,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		if self.applet.formFactor() == Plasma.Horizontal :
 			self.adviceIcon.setOrientation(Qt.Horizontal)
 			self.layout.setOrientation(Qt.Horizontal)
-			if bool(self.popup) : self.layout.addItem(self.adviceIcon)
+			self.layout.addItem(self.adviceIcon)
 		else :
 			self.adviceIcon.setOrientation(Qt.Vertical)
 			self.layout.setOrientation(Qt.Vertical)
@@ -103,7 +103,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 			#print data
 			text = QString().fromUtf8(data)
 			if bool(self.popup) :
-				self.adviceIcon.setIcon(self.kdehome + 'icons/advice.png')
+				self.adviceIcon.setIcon(self.iconPath)
 				self.Control = ControlWidget(text, self.autoclose, self, self.popupColor)
 				self.Control.show()
 			else :
