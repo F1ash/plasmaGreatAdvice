@@ -28,12 +28,10 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		self.Settings = QSettings('kde-plasma-motivator', 'kde-plasma-motivator')
 		self.initVar()
 
-		self.adviceIcon = Plasma.IconWidget()
 		if os.path.exists(self.kdehome + 'icons/advice.png') :
-			self.adviceIcon.setIcon(self.kdehome + 'icons/advice.png')
+			self.iconPath = self.kdehome + 'icons/advice.png'
 		else :
-			self.adviceIcon.setIcon(os.getcwd() + '/kde-plasma-motivator/contents/icons/advice.png')
-		self.adviceIcon.clicked.connect(self.show_n_hide)
+			self.iconPath = os.getcwd() + '/kde-plasma-motivator/contents/icons/advice.png'
 
 	def initVar(self):
 		self.timeout = self.Settings.value('TimeOut', QVariant(10)).toInt()[0]
@@ -43,18 +41,37 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		self.popupColor = self.Settings.value('PopUpColor', 'red').toString()
 		self.iconTextColor = self.Settings.value('IconTextColor', 'blue').toString()
 
+	def initLayout(self):
+		if 'layout' in dir(self) :
+			for i in xrange(self.layout.count()) :
+				item = self.layout.itemAt(i)
+				self.layout.removeAt(i)
+				item = None
+		self.adviceIcon = Plasma.IconWidget()
+		self.adviceIcon.setIcon(self.iconPath)
+		self.adviceIcon.clicked.connect(self.show_n_hide)
+		if self.applet.formFactor() == Plasma.Horizontal :
+			self.adviceIcon.setOrientation(Qt.Horizontal)
+			self.layout.setOrientation(Qt.Horizontal)
+			if bool(self.popup) : self.layout.addItem(self.adviceIcon)
+		else :
+			self.adviceIcon.setOrientation(Qt.Vertical)
+			self.layout.setOrientation(Qt.Vertical)
+			if bool(self.popup) : self.layout.addItem(self.adviceIcon)
+			if bool(self.iconText) :
+				self.adviceLabel = Plasma.Label()
+				self.adviceLabel.setScaledContents(True)
+				self.adviceLabel.setAlignment(Qt.AlignCenter)
+				self.layout.addItem(self.adviceLabel)
+		self.adviceIcon.setTextBackgroundColor(QColor(self.iconTextColor))
+
+		self.layout.setAlignment(self.adviceIcon, Qt.AlignLeft)
+		self.setLayout(self.layout)
+
 	def init(self):
 		self.layout = QGraphicsLinearLayout(self.applet)
 		self.layout.setSpacing(0)
-		self.layout.addItem(self.adviceIcon)
-		self.layout.setAlignment(self.adviceIcon, Qt.AlignRight)
-
-		self.setLayout(self.layout)
-		if self.applet.formFactor() == Plasma.Horizontal :
-			self.adviceIcon.setOrientation(Qt.Horizontal)
-		else :
-			self.adviceIcon.setOrientation(Qt.Vertical)
-		self.adviceIcon.setTextBackgroundColor(QColor(self.iconTextColor))
+		self.initLayout()
 		self.setHasConfigurationInterface(True)
 
 		self.Timer = QTimer()
@@ -83,18 +100,27 @@ class plasmaGreatAdvice(plasmascript.Applet):
 					data = f.read()
 			else :
 				data = 'error'
-			print data
+			#print data
 			text = QString().fromUtf8(data)
-			if self.popup == 1 :
+			if bool(self.popup) :
 				self.adviceIcon.setIcon(self.kdehome + 'icons/advice.png')
 				self.Control = ControlWidget(text, self.autoclose, self, self.popupColor)
 				self.Control.show()
 			else :
 				self.adviceIcon.setIcon('')
-			if self.iconText == 1 :
-				self.adviceIcon.setText(text)
-			else:
-				self.adviceIcon.setText('')
+			if self.applet.formFactor() == Plasma.Horizontal :
+				if bool(self.iconText) :
+					self.adviceIcon.setText(text)
+				else:
+					self.adviceIcon.setText('')
+			else :
+				if bool(self.iconText) :
+					text__ = str(data).replace(',', ', ')
+					text_ = text__.replace('  ', ' ')
+					text = QString().fromUtf8(text_.replace(' ', '\n'))
+					self.adviceLabel.setText(text)
+				else:
+					pass
 			if os.path.exists("/dev/shm/" + fileName) : os.remove("/dev/shm/" + fileName)
 
 	def show_n_hide(self):
@@ -124,7 +150,7 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		self.Timer.stop()
 		self.appletSettings.refreshSettings(self)
 		self.initVar()
-		self.adviceIcon.setTextBackgroundColor(QColor(self.iconTextColor))
+		self.initLayout()
 		self.Timer.start(self.timeout * 1000)
 		self.dialog.done(0)
 
