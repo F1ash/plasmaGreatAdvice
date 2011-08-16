@@ -34,10 +34,10 @@ class plasmaGreatAdvice(plasmascript.Applet):
 			self.iconPath = os.getcwd() + '/kde-plasma-motivator/contents/icons/advice.png'
 
 	def initVar(self):
-		self.timeout = self.Settings.value('TimeOut', QVariant(10)).toInt()[0]
-		self.autoclose = self.Settings.value('AutoClose', QVariant(3)).toInt()[0]
-		self.popup = self.Settings.value('PopUp', 0).toInt()[0]
-		self.iconText = self.Settings.value('IconText', 0).toInt()[0]
+		self.timeout = self.Settings.value('TimeOut', 300).toInt()[0]
+		self.autoclose = self.Settings.value('AutoClose', 3).toInt()[0]
+		self.popup = self.Settings.value('PopUp', 1).toInt()[0]
+		self.iconText = self.Settings.value('IconText', 1).toInt()[0]
 		self.popupColor = self.Settings.value('PopUpColor', 'red').toString()
 		self.iconTextColor = self.Settings.value('IconTextColor', 'blue').toString()
 
@@ -82,6 +82,10 @@ class plasmaGreatAdvice(plasmascript.Applet):
 								QString(''), \
 								QIcon(self.iconPath) ) )
 
+		self.onceTimer = QTimer()
+		self.onceTimer.timeout.connect(self.showAdvice)
+		self.onceTimer.setSingleShot(True)
+		self.onceTimer.start()
 		self.Timer = QTimer()
 		self.Timer.timeout.connect(self.showAdvice)
 		self.Timer.start(self.timeout * 1000)
@@ -102,12 +106,20 @@ class plasmaGreatAdvice(plasmascript.Applet):
 		if 'Control' in dir(self) : self.Control.close()
 		fileName, start, pid = self.getNewText()
 		if start :
-			while pid_exists(pid, 0): time.sleep(0.1)
+			i = 0
+			while pid_exists(pid, 0):
+				time.sleep(0.1)
+				i += 1
+				''' inhibits connect '''
+				if i > 100 : pid_exists(pid, 9)
 			if os.path.exists("/dev/shm/" + fileName) :
 				with open("/dev/shm/" + fileName, 'rb') as f :
 					data = f.read()
 				os.remove("/dev/shm/" + fileName)
+				""" text is absent, may be no connect """
 				if data == '' : data = 'Проверь коннект, ёпта! (Авт.)'
+				""" brocken text, may be low connect """
+				if data.startswith('<span class=') : data = 'Смени блять провайдера! (Авт.)'
 			else :
 				data = 'WARNING: Getting Advice Error'
 		else :
@@ -122,6 +134,8 @@ class plasmaGreatAdvice(plasmascript.Applet):
 			self.adviceIcon.setIcon(self.iconPath)
 			self.Control = ControlWidget(text, self.autoclose, self, self.popupColor)
 			self.Control.show()
+		elif not bool(self.popup) and not bool(self.iconText) :
+			self.adviceIcon.setIcon(self.iconPath)
 		else :
 			self.adviceIcon.setIcon('')
 		if self.applet.formFactor() == Plasma.Horizontal :
@@ -200,10 +214,10 @@ class AppletSettings(QWidget):
 		self.Settings = obj.Settings
 		colorNames = QColor().colorNames()
 
-		timeOut = self.Settings.value('TimeOut', 10).toInt()[0]
+		timeOut = self.Settings.value('TimeOut', 300).toInt()[0]
 		autoClose = self.Settings.value('AutoClose', 3).toInt()[0]
-		popup = self.Settings.value('PopUp', 0).toInt()[0]
-		iconText = self.Settings.value('IconText', 0).toInt()[0]
+		popup = self.Settings.value('PopUp', 1).toInt()[0]
+		iconText = self.Settings.value('IconText', 1).toInt()[0]
 		popupColor = self.Settings.value('PopUpColor', 'red').toString()
 		iconTextColor = self.Settings.value('IconTextColor', 'blue').toString()
 
