@@ -1,20 +1,16 @@
 Name: kde-plasma-motivator
 Version: 1.2
-Release: %(date +%Y%m%d_%H%M)%{?dist}
+Release: 1%{?dist}
 Summary: Funny plasmoid for joke or motivation to work activities and keeping a good mood. 21 + .
 Summary(ru): Плазмоид-шутка для мотивации трудовой деятельности и просто хорошего настроения.
-#Group: Applications/Network
+Group: Applications/Network
 License: GPL
-Source0: %{name}-%{version}.tar.bz2
+Source0: http://cloud.github.com/downloads/F1ash/plasmaGreatAdvice/%{name}-%{version}.tar.bz2
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
 URL: https://github.com/F1ash/plasmaGreatAdvice
 BuildArch: noarch
 
-%if %{defined fedora}
-Requires: python >= 2.6, PyQt4 >= 4.7, PyKDE4 >= 4.6
-Conflicts: python >= 3.0
-BuildRequires: desktop-file-utils
-%endif
+Requires: python, PyQt4, PyKDE4
 
 %description
 kde-plasma-motivator
@@ -31,23 +27,21 @@ kde-plasma-motivator
 
 %install
 rm -rf $RPM_BUILD_ROOT
-mkdir -p $RPM_BUILD_ROOT/%{_kde4_appsdir}/plasma/plasmoids/%{name}
-cp -r * $RPM_BUILD_ROOT/%{_kde4_appsdir}/plasma/plasmoids/%{name}/
+mkdir -p $RPM_BUILD_ROOT/%{_datadir}/kde4/apps/plasma/plasmoids/%{name}
+cp -r * $RPM_BUILD_ROOT/%{_datadir}/kde4/apps/plasma/plasmoids/%{name}/
 mkdir -p $RPM_BUILD_ROOT/%{_datadir}/kde4/services
 cp -r metadata.desktop $RPM_BUILD_ROOT/%{_datadir}/kde4/services/%{name}.desktop
-
 
 %files
 %defattr(-,root,root)
 %{_datadir}/kde4/services/%{name}.desktop
-%{_kde4_appsdir}/plasma/plasmoids/%{name}/*
-%dir %{_kde4_appsdir}/plasma/plasmoids/%{name}
+%{_datadir}/kde4/apps/plasma/plasmoids/%{name}/*
+%dir %{_datadir}/kde4/apps/plasma/plasmoids/%{name}
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
-* Sat Aug 13 2011 Fl@sh <no@mail.me>	-	1.0
--- Build began ;)
-
+* Mon Aug 22 2011 Fl@sh <kaperang07@gmail.com> - 1.2-1
+- Initial build
