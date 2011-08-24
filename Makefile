@@ -1,17 +1,21 @@
 DESTDIR=/usr
 INSTALL=install -D -m 0644 -p
 APP_NAME=kde-plasma-motivator
+KAPPS=share/kde4/apps
+KSERV=share/kde4/services
 PLASMA=plasma/plasmoids
+CODE=contents/code
+ICONS=contents/icons
 
 build:
 	@echo "Nothing to build"
 
 install: build
-	$(INSTALL) metadata.desktop $(DESTDIR)/share/kde4/services/$(APP_NAME).desktop
-	$(INSTALL) contents/code/main.py $(DESTDIR)/share/kde4/apps/$(PLASMA)/$(APP_NAME)/code/main.py
-	$(INSTALL) contents/code/getText.sh $(DESTDIR)/share/kde4/apps/$(PLASMA)/$(APP_NAME)/code/getText.sh
-	$(INSTALL) contents/icons/advice.png $(DESTDIR)/share/kde4/apps/$(PLASMA)/$(APP_NAME)/icons/advice.png
+	$(INSTALL) metadata.desktop $(DESTDIR)/$(KSERV)/$(APP_NAME).desktop
+	$(INSTALL) $(CODE)/main.py $(DESTDIR)/$(KAPPS)/$(PLASMA)/$(APP_NAME)/$(CODE)/main.py
+	$(INSTALL) $(CODE)/getText.sh $(DESTDIR)/$(KAPPS)/$(PLASMA)/$(APP_NAME)/$(CODE)/getText.sh
+	$(INSTALL) $(ICONS)/advice.png $(DESTDIR)/$(KAPPS)/$(PLASMA)/$(APP_NAME)/$(ICONS)/advice.png
 
 clean:
-	rm -rf $(DESTDIR)/share/kde4/services/$(APP_NAME).desktop
-	rm -rf $(DESTDIR)/share/kde4/apps/$(PLASMA)/$(APP_NAME)
+	rm -rf $(DESTDIR)/$(KSERV)/$(APP_NAME).desktop
+	rm -rf $(DESTDIR)/$(KAPPS)/$(PLASMA)/$(APP_NAME)
