@@ -42,7 +42,7 @@ rm -rf $RPM_BUILD_ROOT
 
 %changelog
 
-* Mon Aug 29 2011 Fl@sh <kaperang07@gmail.com> - 1.1.12-2
+* Mon Aug 29 2011 Fl@sh <kaperang07@gmail.com> - 1.2-2
 - fixed Makefile
 
 * Mon Aug 22 2011 Fl@sh <kaperang07@gmail.com> - 1.2-1
